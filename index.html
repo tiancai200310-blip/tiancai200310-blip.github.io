@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>永续合约交易 - BTC/USDT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #12161A;
+            color: #EAECEF;
+            font-size: 14px;
+        }
+        /* 顶部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #1F2630;
+            background-color: #171E26;
+        }
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .symbol-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .symbol-change {
+            font-size: 12px;
+            color: #0ECB81;
+            background: rgba(14, 203, 129, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        /* 主体布局 */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 60px;
+        }
+        /* 简易K线图区域 */
+        .chart-section {
+            height: 180px;
+            background-color: #171E26;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #1F2630;
+            position: relative;
+        }
+        .chart-placeholder {
+            color: #474D57;
+            font-size: 13px;
+            text-align: center;
+        }
+        .price-ticker {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+        }
+        .current-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0ECB81;
+        }
+        /* 交易核心面板 */
+        .trade-panel {
+            display: flex;
+            padding: 12px 16px;
+            gap: 16px;
+            background-color: #12161A;
+        }
+        /* 左侧：表单输入 */
+        .trade-form {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        /* 方向切换 */
+        .dir-tabs {
+            display: flex;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #1F2630;
+            padding: 2px;
+        }
+        .dir-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .dir-tab.buy {
+            background-color: #0ECB81;
+            color: #fff;
+        }
+        .dir-tab.sell {
+            color: #848E9C;
+        }
+        /* 下单类型与杠杆 */
+        .row-options {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .select-box {
+            flex: 1;
+            background-color: #1F2630;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+            color: #EAECEF;
+        }
+        /* 输入框样式 */
+        .input-group {
+            position: relative;
+            background-color: #1F2630;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #EAECEF;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+        .input-unit {
+            font-size: 12px;
+            color: #848E9C;
+            margin-left: 4px;
+        }
+        /* 杠杆滑块/百分比按钮 */
+        .percent-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+        }
+        .percent-btn {
+            flex: 1;
+            background-color: #1F2630;
+            color: #848E9C;
+            border: none;
+            padding: 6px 0;
+            font-size: 11px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .percent-btn.active {
+            background-color: #474D57;
+            color: #FFF;
+        }
+        /* 资产信息 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #848E9C;
+            margin-top: 4px;
+        }
+        .info-value {
+            color: #EAECEF;
+        }
+        /* 提交按钮 */
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .submit-btn.buy {
+            background-color: #0ECB81;
+            color: white;
+        }
+        /* 右侧：简易盘口/深度图 */
+        .order-book {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+        }
+        .book-header {
+            display: flex;
+            justify-content: space-between;
+            color: #848E9C;
+            margin-bottom: 6px;
+        }
+        .book-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            position: relative;
+        }
+        .book-row.ask .price { color: #F6465D; }
+        .book-row.bid .price { color: #0ECB81; }
+        .book-row .qty { color: #B7BDC6; }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部标题栏 -->
+    <div class="header">
+        <div class="symbol-info">
+            <span class="symbol-name">BTCUSDT 永续</span>
+            <span class="symbol-change">+2.34%</span>
+        </div>
+        <div style="color: #848E9C;">⚙️</div>
+    </div>
+
+    <div class="main-container">
+        <!-- 简易K线与价格显示区 -->
+        <div class="chart-section">
+            <div class="price-ticker">
+                <div class="current-price">67,420.50</div>
+                <div style="font-size:12px; color:#848E9C;">≈ $67,420.50</div>
+            </div>
+            <div class="chart-placeholder">
+                [ 简化交易行情 K 线图表区域 ]
+            </div>
+        </div>
+
+        <!-- 交易操作面板 -->
+        <div class="trade-panel">
+            <!-- 左侧：用户表单 -->
+            <div class="trade-form">
+                <div class="dir-tabs">
+                    <div class="dir-tab buy">买入开多</div>
+                    <div class="dir-tab sell">卖出开空</div>
+                </div>
+
+                <div class="row-options">
+                    <div class="select-box">限价单 ▾</div>
+                    <div class="select-box">逐仓 20x ▾</div>
+                </div>
+
+                <div class="input-group">
+                    <input type="number" placeholder="价格" value="67420.5">
+                    <span class="input-unit">USDT</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="number" placeholder="数量">
+                    <span class="input-unit">BTC</span>
+                </div>
+
+                <div class="percent-row">
+                    <button class="percent-btn">25%</button>
+                    <button class="percent-btn">50%</button>
+                    <button class="percent-btn">75%</button>
+                    <button class="percent-btn">100%</button>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-row">
+                        <span>可用余额</span>
+                        <span class="info-value">1,250.45 USDT</span>
+                    </div>
+                    <div class="info-row">
+                        <span>预计保证金</span>
+                        <span class="info-value">0.00 USDT</span>
+                    </div>
+                </div>
+
+                <button class="submit-btn buy">买入(开多)</button>
+            </div>
+
+            <!-- 右侧：简易五档盘口 -->
+            <div class="order-book">
+                <div class="book-header">
+                    <span>价格(USDT)</span>
+                    <span>数量(BTC)</span>
+                </div>
+                <!-- 卖盘 (红) -->
+                <div class="book-row ask"><span class="price">67425.0</span><span class="qty">0.451</span></div>
+                <div class="book-row ask"><span class="price">67423.5</span><span class="qty">1.280</span></div>
+                <div class="book-row ask"><span class="price">67422.0</span><span class="qty">0.092</span></div>
+                <div class="book-row ask"><span class="price">67421.5</span><span class="qty">2.144</span></div>
+                
+                <!-- 中间价分界 -->
+                <div style="margin: 8px 0; border-top: 1px dashed #2B3139;"></div>
+                
+                <!-- 买盘 (绿) -->
+                <div class="book-row bid"><span class="price">67419.5</span><span class="qty">0.881</span></div>
+                <div class="book-row bid"><span class="price">67418.0</span><span class="qty">1.502</span></div>
+                <div class="book-row bid"><span class="price">67416.5</span><span class="qty">0.113</span></div>
+                <div class="book-row bid"><span class="price">67415.0</span><span class="qty">3.245</span></div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
