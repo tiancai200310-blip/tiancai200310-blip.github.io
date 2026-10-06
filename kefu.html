@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>加密工单系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background-color: #12161A; color: #EAECEF; height: 100vh; display: flex; flex-direction: column; }
+        .chat-header { padding: 16px; background-color: #171E26; border-bottom: 1px solid #1F2630; display: flex; justify-content: space-between; align-items: center; }
+        .back-link { color: #848E9C; text-decoration: none; }
+        .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .msg { max-width: 80%; padding: 12px; border-radius: 6px; font-size: 14px; line-height: 1.5; }
+        .msg.sys { background-color: #1F2630; color: #B7BDC6; align-self: flex-start; border-left: 3px solid #F0B90B; }
+        .msg.user { background-color: #F0B90B; color: #12161A; align-self: flex-end; font-weight: 500; }
+        
+        .chat-footer { padding: 12px; background-color: #171E26; border-top: 1px solid #1F2630; display: flex; gap: 10px; }
+        .chat-input { flex: 1; background-color: #1F2630; border: 1px solid #2B3139; padding: 12px; border-radius: 4px; color: white; outline: none; }
+        .send-btn { background-color: #F0B90B; color: #12161A; border: none; padding: 0 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">
+        <a href="index.html" class="back-link">✕ 关闭工单</a>
+        <span style="font-weight:bold;">链上节点故障排查安全通道</span>
+        <div style="width:10px; height:10px; background-color:#0ECB81; border-radius:50%;"></div>
+    </div>
+
+    <div class="chat-body" id="chat-box">
+        <div class="msg sys">【安全防线机制】：本次对话已通过端对端加密保护。系统已为您自动连接至海外数字资产加急清洗撮合后台服务中心。</div>
+        <div class="msg sys">客服专员（在线）：您好！请问您在充值出入金、全仓高倍率合约交易、或者 Binance Rain 奖励空投雨结算过程中遇到了什么问题？请在此直接描述，我们将在 1 个区块时间内优先处理。</div>
+    </div>
+
+    <div class="chat-footer">
+        <input type="text" class="chat-input" id="msg-input" placeholder="请详细输入您的问题工单凭证...">
+        <button class="send-btn" onclick="sendMsg()">提交</button>
+    </div>
+
+    <script>
+        function sendMsg() {
+            const input = document.getElementById('msg-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            const box = document.getElementById('chat-box');
+            
+            // 渲染用户发送的内容
+            const uMsg = document.createElement('div');
+            uMsg.className = 'msg user';
+            uMsg.innerText = txt;
+            box.appendChild(uMsg);
+            
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            // 模拟 1.5 秒后机器客服高仿秒回复
+            setTimeout(() => {
+                const sMsg = document.createElement('div');
+                sMsg.className = 'msg sys';
+                sMsg.innerText = '【系统安全确认】：您的安全上报凭证已成功提交。目前海外区块链排队区块较多，如遇资金归集延迟，请直接前往“资产充值”中心重新校准接收钱包地址（TRC20），系统将在网络确认后自动极速调账到账。';
+                box.appendChild(sMsg);
+                box.scrollTop = box.scrollHeight;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
