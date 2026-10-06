@@ -20,7 +20,7 @@
             background-color: #12161A; color: #EAECEF; font-size: 14px;
             display: flex; flex-direction: column; height: 100vh; overflow: hidden;
             padding-top: env(safe-area-inset-top);
-            padding-bottom: calc(56px + env(safe-area-inset-bottom)); /* 预留底部导航栏及苹果安全区高度 */
+            padding-bottom: calc(56px + env(safe-area-inset-bottom));
         }
         /* 顶部导航 */
         .header {
@@ -37,7 +37,7 @@
         /* 主体滚动区 */
         .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
         
-        /* 权威 TradingView K线图容器 */
+        /* TradingView K线图容器 */
         .chart-section { height: 240px; background-color: #171E26; margin-bottom: 8px; border-bottom: 1px solid #1F2630; width: 100%; }
         
         /* 交易面板 */
@@ -55,7 +55,7 @@
         .info-row { display: flex; justify-content: space-between; font-size: 12px; color: #848E9C; margin-top: 4px; }
         .info-value { color: #EAECEF; }
         
-        /* 智能交互提交按钮 */
+        /* 交互提交按钮 */
         .submit-btn {
             width: 100%; padding: 12px; border: none; border-radius: 4px;
             font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px;
@@ -73,7 +73,7 @@
         .book-row.bid .price { color: #0ECB81; }
         .book-row .qty { color: #B7BDC6; }
 
-        /* 新增：持仓记录伪装区 */
+        /* 持仓记录区 */
         .position-section { border-top: 8px solid #0B0E11; background-color: #12161A; padding: 16px; }
         .position-tabs { display: flex; gap: 20px; border-bottom: 1px solid #1F2630; padding-bottom: 10px; margin-bottom: 24px; }
         .position-tab { font-size: 14px; color: #848E9C; font-weight: bold; cursor: pointer; position: relative; }
@@ -82,7 +82,7 @@
         .empty-holder { text-align: center; padding: 40px 0; color: #474D57; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .empty-icon { font-size: 40px; color: #2B3139; }
 
-        /* 新增：底部原生金刚固定导航栏 */
+        /* 底部固定导航栏 */
         .footer-navbar {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background-color: #171E26; border-top: 1px solid #1F2630;
@@ -95,19 +95,18 @@
         .nav-icon { font-size: 18px; }
         .nav-text { font-size: 11px; font-weight: 500; }
     </style>
-    <!-- 正确引入 TradingView 官方免费图形组件库库文件 -->
+    <!-- 引入 TradingView 官方免费图形组件库 -->
     <script type="text/javascript" src="https://tradingview.com"></script>
 </head>
 <body>
 
-    <!-- 顶部状态栏及搜索 -->
+    <!-- 顶部导航 -->
     <div class="header">
         <div class="header-top">
             <div class="symbol-info">
                 <span class="symbol-name" id="current-token">BTC / USDT</span>
                 <span class="symbol-change" id="live-change">+0.00%</span>
             </div>
-            <!-- 动态用户状态栏 -->
             <div id="user-status-area">
                 <span onclick="window.location.href='login.html'" style="color: #F0B90B; cursor: pointer; font-size: 13px; font-weight: bold;">登录 / 注册</span>
             </div>
@@ -117,12 +116,10 @@
         </div>
     </div>
 
-    <!-- 可滚动主体区 -->
+    <!-- 主体内容 -->
     <div class="main-container">
-        <!-- 真正的 TradingView 动态 K 线图表 -->
         <div class="chart-section" id="tv-chart-container"></div>
 
-        <!-- 交易核心操作面板 -->
         <div class="trade-panel">
             <div class="trade-form">
                 <div class="dir-tabs" id="action-tabs">
@@ -150,7 +147,6 @@
                 <button class="submit-btn locked" id="main-action-btn" onclick="handleMainAction()">请先登录账号</button>
             </div>
 
-            <!-- 五档深度数据 -->
             <div class="order-book">
                 <div class="book-header">
                     <span>价格(USDT)</span>
@@ -162,7 +158,6 @@
             </div>
         </div>
 
-        <!-- 伪装持仓列表区块 -->
         <div class="position-section">
             <div class="position-tabs">
                 <div class="position-tab active">当前持仓 (0)</div>
@@ -176,7 +171,7 @@
         </div>
     </div>
 
-    <!-- 底部原生固定导航栏 -->
+    <!-- 底部原生金刚固定导航栏 -->
     <div class="footer-navbar">
         <div class="nav-item" onclick="alert('正在加载加密现货大厅...')">
             <span class="nav-icon">📊</span><span class="nav-text">行情</span>
@@ -190,3 +185,11 @@
         <div class="nav-item" id="nav-asset-btn" onclick="handleNavAsset()">
             <span class="nav-icon">💰</span><span class="nav-text">资产</span>
         </div>
+    </div>
+
+    <script>
+        let currentCoinId = 'bitcoin'; 
+        let currentSymbol = 'BTC';
+        let tvSymbol = 'BINANCE:BTCUSDT'; 
+        let lastPrice = 0;
+        let tradeDirection = 'buy';
