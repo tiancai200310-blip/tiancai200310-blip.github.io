@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>永续合约交易 - BTC/USDT</title>
+    <title>全球永续合约交易系统</title>
     <!-- 关联 PWA 手机 App 配置文件 -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script>
-        // 注册 Service Worker 激活 App 模式
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
@@ -27,15 +26,24 @@
             background-color: #12161A;
             color: #EAECEF;
             font-size: 14px;
-        }
-        /* 顶部导航 */
-        .header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* 顶部导航与搜索 */
+        .header {
             padding: 12px 16px;
             border-bottom: 1px solid #1F2630;
             background-color: #171E26;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .symbol-info {
             display: flex;
@@ -52,17 +60,35 @@
             background: rgba(14, 203, 129, 0.1);
             padding: 2px 6px;
             border-radius: 4px;
-            transition: all 0.3s;
         }
-        /* 主体布局 */
+        /* 搜索框样式 */
+        .search-box {
+            background-color: #1F2630;
+            border: 1px solid #2B3139;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+        }
+        .search-box input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #EAECEF;
+            font-size: 13px;
+        }
+        /* 主体滚动区 */
         .main-container {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            padding-bottom: 60px;
+            overflow-y: auto;
+            padding-bottom: 30px;
         }
         /* 简易K线图区域 */
         .chart-section {
-            height: 180px;
+            height: 140px;
             background-color: #171E26;
             margin-bottom: 8px;
             display: flex;
@@ -73,7 +99,7 @@
         }
         .chart-placeholder {
             color: #474D57;
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
         }
         .price-ticker {
@@ -82,30 +108,25 @@
             left: 16px;
         }
         .current-price {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             color: #0ECB81;
-            transition: color 0.1s ease;
         }
-        /* 交易核心面板 */
+        /* 交易面板 */
         .trade-panel {
             display: flex;
-            padding: 12px 16px;
+            padding: 0 16px;
             gap: 16px;
-            background-color: #12161A;
         }
-        /* 左侧：表单输入 */
         .trade-form {
             flex: 1.2;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        /* 方向切换 */
         .dir-tabs {
             display: flex;
             border-radius: 4px;
-            overflow: hidden;
             background-color: #1F2630;
             padding: 2px;
         }
@@ -115,115 +136,37 @@
             padding: 8px 0;
             font-weight: bold;
             font-size: 13px;
-            cursor: pointer;
             border-radius: 4px;
         }
-        .dir-tab.buy {
-            background-color: #0ECB81;
-            color: #fff;
-        }
-        .dir-tab.sell {
-            color: #848E9C;
-        }
-        /* 下单类型与杠杆 */
-        .row-options {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-        }
+        .dir-tab.buy { background-color: #0ECB81; color: #fff; }
+        .dir-tab.sell { color: #848E9C; }
+        
+        .row-options { display: flex; justify-content: space-between; gap: 8px; }
         .select-box {
-            flex: 1;
-            background-color: #1F2630;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            text-align: center;
-            color: #EAECEF;
+            flex: 1; background-color: #1F2630; padding: 8px;
+            border-radius: 4px; font-size: 12px; text-align: center; color: #EAECEF;
         }
-        /* 输入框样式 */
         .input-group {
-            position: relative;
-            background-color: #1F2630;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
+            background-color: #1F2630; border-radius: 4px;
+            display: flex; align-items: center; padding: 0 10px;
         }
         .input-group input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #EAECEF;
-            padding: 10px 0;
-            font-size: 14px;
+            width: 100%; background: transparent; border: none;
+            outline: none; color: #EAECEF; padding: 10px 0; font-size: 14px;
         }
-        .input-unit {
-            font-size: 12px;
-            color: #848E9C;
-            margin-left: 4px;
-        }
-        /* 杠杆滑块/百分比按钮 */
-        .percent-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 4px;
-        }
-        .percent-btn {
-            flex: 1;
-            background-color: #1F2630;
-            color: #848E9C;
-            border: none;
-            padding: 6px 0;
-            font-size: 11px;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-        /* 资产信息 */
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #848E9C;
-            margin-top: 4px;
-        }
-        .info-value {
-            color: #EAECEF;
-        }
-        /* 提交按钮 */
+        .input-unit { font-size: 12px; color: #848E9C; margin-left: 4px; }
+        .info-row { display: flex; justify-content: space-between; font-size: 12px; color: #848E9C; margin-top: 4px; }
+        .info-value { color: #EAECEF; }
+        
         .submit-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            margin-top: 6px;
+            width: 100%; padding: 12px; border: none; border-radius: 4px;
+            font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px;
+            background-color: #F0B90B; color: #12161A;
         }
-        .submit-btn.buy {
-            background-color: #F0B90B;
-            color: #12161A;
-        }
-        /* 右侧：简易盘口/深度图 */
-        .order-book {
-            flex: 0.8;
-            display: flex;
-            flex-direction: column;
-            font-size: 12px;
-        }
-        .book-header {
-            display: flex;
-            justify-content: space-between;
-            color: #848E9C;
-            margin-bottom: 6px;
-        }
-        .book-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            position: relative;
-        }
+        /* 右侧盘口 */
+        .order-book { flex: 0.8; display: flex; flex-direction: column; font-size: 12px; }
+        .book-header { display: flex; justify-content: space-between; color: #848E9C; margin-bottom: 6px; }
+        .book-row { display: flex; justify-content: space-between; padding: 3px 0; }
         .book-row.ask .price { color: #F6465D; }
         .book-row.bid .price { color: #0ECB81; }
         .book-row .qty { color: #B7BDC6; }
@@ -231,20 +174,26 @@
 </head>
 <body>
 
-    <!-- 顶部标题栏 -->
+    <!-- 顶部状态栏及搜索 -->
     <div class="header">
-        <div class="symbol-info">
-            <span class="symbol-name">BTCUSDT 永续</span>
-            <span class="symbol-change" id="top-change">+0.00%</span>
+        <div class="header-top">
+            <div class="symbol-info">
+                <span class="symbol-name" id="current-token">BTC / USDT</span>
+                <span class="symbol-change" id="live-change">+0.00%</span>
+            </div>
+            <div onclick="window.location.href='login.html'" style="color: #F0B90B; cursor: pointer; font-size: 13px; font-weight: bold;">登录 / 注册</div>
         </div>
-        <div onclick="window.location.href='login.html'" style="color: #F0B90B; cursor: pointer; font-size: 13px; font-weight: bold;">登录 / 注册</div>
+        <!-- 全球已知币种搜索框 -->
+        <div class="search-box">
+            <input type="text" id="crypto-search" placeholder="🔍 输入代币简称搜索全网代币 (例如: eth, sol, pepe)..." oninput="searchCrypto()">
+        </div>
     </div>
 
     <div class="main-container">
-        <!-- 简易K线与价格显示区 -->
+        <!-- 实时行情区 -->
         <div class="chart-section">
             <div class="price-ticker">
-                <div class="current-price" id="live-price">-------.--</div>
+                <div class="current-price" id="live-price">加载中...</div>
                 <div style="font-size:12px; color:#848E9C;" id="live-usdt">≈ $--</div>
             </div>
             <div class="chart-placeholder">
@@ -252,68 +201,79 @@
             </div>
         </div>
 
-        <!-- 交易操作面板 -->
+        <!-- 交易面板 -->
         <div class="trade-panel">
-            <!-- 左侧：用户表单 -->
             <div class="trade-form">
                 <div class="dir-tabs">
                     <div class="dir-tab buy">买入开多</div>
                     <div class="dir-tab sell">卖出开空</div>
                 </div>
-
                 <div class="row-options">
                     <div class="select-box">限价单 ▾</div>
                     <div class="select-box">逐仓 20x ▾</div>
                 </div>
-
                 <div class="input-group">
-                    <input type="number" placeholder="价格" id="form-price" value="">
+                    <input type="number" id="form-price">
                     <span class="input-unit">USDT</span>
                 </div>
-
                 <div class="input-group">
                     <input type="number" placeholder="数量">
-                    <span class="input-unit">BTC</span>
+                    <span class="input-unit" id="form-unit">BTC</span>
                 </div>
-
-                <div class="percent-row">
-                    <button class="percent-btn">25%</button>
-                    <button class="percent-btn">50%</button>
-                    <button class="percent-btn">75%</button>
-                    <button class="percent-btn">100%</button>
-                </div>
-
                 <div class="info-section">
                     <div class="info-row">
                         <span>可用余额</span>
                         <span class="info-value"><a href="login.html" style="color:#F0B90B; text-decoration:none;">请先登录 ➔</a></span>
                     </div>
-                    <div class="info-row">
-                        <span>预计保证金</span>
-                        <span class="info-value">0.00 USDT</span>
-                    </div>
                 </div>
-
-                <button class="submit-btn buy" onclick="window.location.href='login.html'">请先登录账号</button>
+                <button class="submit-btn" onclick="window.location.href='login.html'">请先登录账号</button>
             </div>
 
-            <!-- 右侧：简易五档盘口 -->
+            <!-- 五档深度数据 -->
             <div class="order-book">
                 <div class="book-header">
                     <span>价格(USDT)</span>
-                    <span>数量(BTC)</span>
+                    <span>数量</span>
                 </div>
-                <!-- 卖盘 (红) -->
-                <div id="asks-container">
-                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
-                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
-                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
-                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
-                </div>
+                <div id="asks-container"></div>
+                <div style="margin: 6px 0; border-top: 1px dashed #2B3139;"></div>
+                <div id="bids-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCoinId = 'bitcoin'; 
+        let currentSymbol = 'BTC';
+        let lastPrice = 0;
+
+        // 初始化加载默认币种行情
+        async function fetchMarketData() {
+            try {
+                // 直接从公共API拉取目标代币的最新真实全球市场价、涨跌幅
+                const response = await fetch(`https://coingecko.com{currentCoinId}&vs_currencies=usdt&include_24hr_change=true`);
+                const data = await response.json();
                 
-                <!-- 中间价分界 -->
-                <div style="margin: 8px 0; border-top: 1px dashed #2B3139;"></div>
-                
-                <!-- 买盘 (绿) -->
-                <div id="bids-container">
-                    <div class="book-row bid"><span class="price">--</span><span class="qty">--</span></div>
+                if (data[currentCoinId]) {
+                    const price = data[currentCoinId].usdt;
+                    const change = data[currentCoinId].usdt_24h_change || 0;
+                    
+                    // 格式化输出长短价格
+                    const formattedPrice = price > 1 ? price.toFixed(2) : price.toFixed(6);
+                    
+                    document.getElementById('live-price').innerText = formattedPrice;
+                    document.getElementById('live-usdt').innerText = `≈ $${formattedPrice}`;
+                    
+                    const formPriceInput = document.getElementById('form-price');
+                    if(document.activeElement !== formPriceInput) {
+                        formPriceInput.value = formattedPrice;
+                    }
+
+                    // 实时颜色渲染
+                    const priceEl = document.getElementById('live-price');
+                    if (lastPrice > 0) {
+                        priceEl.style.color = price >= lastPrice ? '#0ECB81' : '#F6465D';
+                    }
+                    lastPrice = price;
+
+                    // 渲染涨跌幅百分比
