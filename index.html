@@ -52,6 +52,7 @@
             background: rgba(14, 203, 129, 0.1);
             padding: 2px 6px;
             border-radius: 4px;
+            transition: all 0.3s;
         }
         /* 主体布局 */
         .main-container {
@@ -84,6 +85,7 @@
             font-size: 24px;
             font-weight: bold;
             color: #0ECB81;
+            transition: color 0.1s ease;
         }
         /* 交易核心面板 */
         .trade-panel {
@@ -177,10 +179,6 @@
             border-radius: 2px;
             cursor: pointer;
         }
-        .percent-btn.active {
-            background-color: #474D57;
-            color: #FFF;
-        }
         /* 资产信息 */
         .info-row {
             display: flex;
@@ -204,7 +202,7 @@
             margin-top: 6px;
         }
         .submit-btn.buy {
-            background-color: #F0B90B; /* 变为引导登录的金黄色 */
+            background-color: #F0B90B;
             color: #12161A;
         }
         /* 右侧：简易盘口/深度图 */
@@ -237,9 +235,8 @@
     <div class="header">
         <div class="symbol-info">
             <span class="symbol-name">BTCUSDT 永续</span>
-            <span class="symbol-change">+2.34%</span>
+            <span class="symbol-change" id="top-change">+0.00%</span>
         </div>
-        <!-- 右上角直接放个去登录的入口 -->
         <div onclick="window.location.href='login.html'" style="color: #F0B90B; cursor: pointer; font-size: 13px; font-weight: bold;">登录 / 注册</div>
     </div>
 
@@ -247,8 +244,8 @@
         <!-- 简易K线与价格显示区 -->
         <div class="chart-section">
             <div class="price-ticker">
-                <div class="current-price">67,420.50</div>
-                <div style="font-size:12px; color:#848E9C;">≈ $67,420.50</div>
+                <div class="current-price" id="live-price">-------.--</div>
+                <div style="font-size:12px; color:#848E9C;" id="live-usdt">≈ $--</div>
             </div>
             <div class="chart-placeholder">
                 [ 简化交易行情 K 线图表区域 ]
@@ -270,7 +267,7 @@
                 </div>
 
                 <div class="input-group">
-                    <input type="number" placeholder="价格" value="67420.5">
+                    <input type="number" placeholder="价格" id="form-price" value="">
                     <span class="input-unit">USDT</span>
                 </div>
 
@@ -297,7 +294,6 @@
                     </div>
                 </div>
 
-                <!-- 核心修改：点击此按钮直接切入登录状态 -->
                 <button class="submit-btn buy" onclick="window.location.href='login.html'">请先登录账号</button>
             </div>
 
@@ -308,13 +304,16 @@
                     <span>数量(BTC)</span>
                 </div>
                 <!-- 卖盘 (红) -->
-                <div class="book-row ask"><span class="price">67425.0</span><span class="qty">0.451</span></div>
-                <div class="book-row ask"><span class="price">67423.5</span><span class="qty">1.280</span></div>
-                <div class="book-row ask"><span class="price">67422.0</span><span class="qty">0.092</span></div>
-                <div class="book-row ask"><span class="price">67421.5</span><span class="qty">2.144</span></div>
+                <div id="asks-container">
+                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
+                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
+                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
+                    <div class="book-row ask"><span class="price">--</span><span class="qty">--</span></div>
+                </div>
                 
                 <!-- 中间价分界 -->
                 <div style="margin: 8px 0; border-top: 1px dashed #2B3139;"></div>
                 
                 <!-- 买盘 (绿) -->
-                <div class="book-row bid"><span class="price">67419.5</span><span class="qty">0.881</span></div>
+                <div id="bids-container">
+                    <div class="book-row bid"><span class="price">--</span><span class="qty">--</span></div>
