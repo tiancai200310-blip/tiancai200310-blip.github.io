@@ -1,0 +1,16 @@
+{
+  "name": "永续合约交易系统",
+  "short_name": "合约交易",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#12161A",
+  "theme_color": "#171E26",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://flaticon.com",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
