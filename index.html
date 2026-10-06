@@ -3,105 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>行情中心</title>
+    <title>全球远期合约交易系统</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script>
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    </script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: #12161A; color: #EAECEF; font-size: 14px; padding-bottom: 70px; padding-top: env(safe-area-inset-top); }
-        .tabs { display: flex; gap: 24px; padding: 16px; border-bottom: 1px solid #1F2630; background-color: #171E26; }
-        .tab { font-size: 16px; color: #848E9C; font-weight: bold; cursor: pointer; position: relative; }
-        .tab.active { color: #F0B90B; }
-        .tab.active::after { content: ''; position: absolute; bottom: -17px; left: 0; width: 100%; height: 3px; background-color: #F0B90B; }
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #12161A; color: #EAECEF; font-size: 14px;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: calc(56px + env(safe-area-inset-bottom));
+        }
+        .header {
+            padding: 12px 16px; border-bottom: 1px solid #1F2630; background-color: #171E26;
+            display: flex; flex-direction: column; gap: 10px; z-index: 10;
+        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .symbol-info { display: flex; align-items: center; gap: 8px; }
+        .symbol-name { font-size: 18px; font-weight: bold; }
+        .symbol-change { font-size: 12px; color: #0ECB81; background: rgba(14, 203, 129, 0.1); padding: 2px 6px; border-radius: 4px; }
+        .search-box { background-color: #1F2630; border: 1px solid #2B3139; border-radius: 6px; display: flex; align-items: center; padding: 6px 12px; }
+        .search-box input { width: 100%; background: transparent; border: none; outline: none; color: #EAECEF; font-size: 13px; }
         
-        .list-header { display: flex; justify-content: space-between; padding: 12px 16px; font-size: 12px; color: #848E9C; border-bottom: 1px solid #1F2630; }
-        .coin-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #1F2630; cursor: pointer; }
-        .coin-left { display: flex; flex-direction: column; gap: 4px; }
-        .coin-name { font-size: 16px; font-weight: bold; color: #FFF; }
-        .coin-vol { font-size: 12px; color: #848E9C; }
-        .coin-right { display: flex; align-items: center; gap: 20px; }
-        .coin-price { font-size: 16px; font-weight: bold; text-align: right; }
-        .coin-change { width: 80px; padding: 8px 0; text-align: center; border-radius: 4px; font-weight: bold; font-size: 13px; }
-        .up { background-color: rgba(14, 203, 129, 0.15); color: #0ECB81; }
-        .down { background-color: rgba(246, 70, 93, 0.15); color: #F6465D; }
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .chart-section { height: 240px; background-color: #171E26; margin-bottom: 8px; border-bottom: 1px solid #1F2630; width: 100%; }
         
-        /* 底部导航栏 */
-        .footer-navbar { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #171E26; border-top: 1px solid #1F2630; display: flex; justify-content: space-around; align-items: center; padding-top: 8px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #848E9C; text-decoration: none; }
+        .trade-panel { display: flex; padding: 0 16px; gap: 16px; margin-bottom: 16px; }
+        .trade-form { flex: 1.2; display: flex; flex-direction: column; gap: 12px; }
+        .dir-tabs { display: flex; border-radius: 4px; background-color: #1F2630; padding: 2px; }
+        .dir-tab { flex: 1; text-align: center; padding: 8px 0; font-weight: bold; font-size: 13px; border-radius: 4px; cursor: pointer;}
+        .dir-tab.buy { background-color: #0ECB81; color: #fff; }
+        .dir-tab.sell { color: #848E9C; }
+        .row-options { display: flex; justify-content: space-between; gap: 8px; }
+        .select-box { flex: 1; background-color: #1F2630; padding: 8px; border-radius: 4px; font-size: 12px; text-align: center; color: #EAECEF; }
+        .input-group { background-color: #1F2630; border-radius: 4px; display: flex; align-items: center; padding: 0 10px; }
+        .input-group input { width: 100%; background: transparent; border: none; outline: none; color: #EAECEF; padding: 10px 0; font-size: 14px; }
+        .input-unit { font-size: 12px; color: #848E9C; margin-left: 4px; }
+        .info-row { display: flex; justify-content: space-between; font-size: 12px; color: #848E9C; margin-top: 4px; }
+        .info-value { color: #EAECEF; }
+        
+        .submit-btn {
+            width: 100%; padding: 12px; border: none; border-radius: 4px;
+            font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 6px;
+            transition: all 0.2s;
+        }
+        .submit-btn.locked { background-color: #F0B90B; color: #12161A; }
+        .submit-btn.unlocked-buy { background-color: #0ECB81; color: white; }
+        .submit-btn.unlocked-sell { background-color: #F6465D; color: white; }
+        
+        .order-book { flex: 0.8; display: flex; flex-direction: column; font-size: 12px; }
+        .book-header { display: flex; justify-content: space-between; color: #848E9C; margin-bottom: 6px; }
+        .book-row { display: flex; justify-content: space-between; padding: 3px 0; }
+        .book-row.ask .price { color: #F6465D; }
+        .book-row.bid .price { color: #0ECB81; }
+        .book-row .qty { color: #B7BDC6; }
+
+        .position-section { border-top: 8px solid #0B0E11; background-color: #12161A; padding: 16px; }
+        .position-tabs { display: flex; gap: 20px; border-bottom: 1px solid #1F2630; padding-bottom: 10px; margin-bottom: 24px; }
+        .position-tab { font-size: 14px; color: #848E9C; font-weight: bold; cursor: pointer; position: relative; }
+        .position-tab.active { color: #F0B90B; }
+        .position-tab.active::after { content: ''; position: absolute; bottom: -11px; left: 0; width: 100%; height: 2px; background-color: #F0B90B; }
+        .empty-holder { text-align: center; padding: 40px 0; color: #474D57; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .empty-icon { font-size: 40px; color: #2B3139; }
+
+        /* 底部固定导航栏 */
+        .footer-navbar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: #171E26; border-top: 1px solid #1F2630;
+            display: flex; justify-content: space-around; align-items: center;
+            padding-top: 8px; padding-bottom: calc(6px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #848E9C; text-decoration: none; cursor: pointer; }
         .nav-item.active { color: #F0B90B; }
         .nav-icon { font-size: 18px; }
-        .nav-text { font-size: 11px; }
+        .nav-text { font-size: 11px; font-weight: 500; }
     </style>
+    <script type="text/javascript" src="https://tradingview.com"></script>
 </head>
 <body>
 
-    <div class="tabs">
-        <div class="tab">自选</div>
-        <div class="tab active">现货大厅</div>
-        <div class="tab">各类榜单</div>
-    </div>
-
-    <div class="list-header">
-        <span>名称 / 24h成交量</span>
-        <div style="display: flex; gap: 55px; margin-right: 20px;">
-            <span>最新价</span>
-            <span>24h涨跌</span>
+    <div class="header">
+        <div class="header-top">
+            <div class="symbol-info">
+                <span class="symbol-name" id="current-token">BTC / USDT</span>
+                <span class="symbol-change" id="live-change">+0.00%</span>
+            </div>
+            <div id="user-status-area">
+                <span onclick="window.location.href='login.html'" style="color: #F0B90B; cursor: pointer; font-size: 13px; font-weight: bold;">登录 / 注册</span>
+            </div>
+        </div>
+        <div class="search-box">
+            <input type="text" id="crypto-search" placeholder="🔍 输入代币简称搜索全网行情 (如: eth, sol, doge)..." oninput="searchCrypto()">
         </div>
     </div>
 
-    <!-- 真实数据渲染池 -->
-    <div id="market-list">
-        <div style="text-align: center; padding: 40px; color: #474D57;">正在极速同步全球链上交易流动性...</div>
+    <div class="main-container">
+        <div class="chart-section" id="tv-chart-container"></div>
+
+        <div class="trade-panel">
+            <div class="trade-form">
+                <div class="dir-tabs" id="action-tabs">
+                    <div class="dir-tab buy" onclick="switchDirection('buy')">买入开多</div>
+                    <div class="dir-tab sell" onclick="switchDirection('sell')">卖出开空</div>
+                </div>
+                <div class="row-options">
+                    <div class="select-box">限价单 ▾</div>
+                    <div class="select-box">逐仓 20x ▾</div>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="form-price">
+                    <span class="input-unit">USDT</span>
+                </div>
+                <div class="input-group">
+                    <input type="number" placeholder="数量">
+                    <span class="input-unit" id="form-unit">BTC</span>
+                </div>
+                <div class="info-section">
+                    <div class="info-row">
+                        <span>可用余额</span>
+                        <span class="info-value" id="balance-field"><a href="login.html" style="color:#F0B90B; text-decoration:none;">请先登录 ➔</a></span>
+                    </div>
+                </div>
+                <button class="submit-btn locked" id="main-action-btn" onclick="handleMainAction()">请先登录账号</button>
+            </div>
+
+            <div class="order-book">
+                <div class="book-header">
+                    <span>价格(USDT)</span>
+                    <span>数量</span>
+                </div>
+                <div id="asks-container"></div>
+                <div style="margin: 6px 0; border-top: 1px dashed #2B3139;"></div>
+                <div id="bids-container"></div>
+            </div>
+        </div>
+
+        <div class="position-section">
+            <div class="position-tabs">
+                <div class="position-tab active">当前持仓 (0)</div>
+                <div class="position-tab">当前委托 (0)</div>
+                <div class="position-tab">历史委托</div>
+            </div>
+            <div class="empty-holder">
+                <div class="empty-icon">📄</div>
+                <div style="font-size: 12px;">暂无活跃持仓订单</div>
+            </div>
+        </div>
     </div>
 
+    <!-- 底部原生固定导航栏 -->
     <div class="footer-navbar">
-        <a href="market.html" class="nav-item active"><span class="nav-icon">📊</span><span class="nav-text">行情</span></a>
-        <a href="otc.html" class="nav-item"><span class="nav-icon">💳</span><span class="nav-text">法币交易</span></a>
-        <a href="index.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-text">合约交易</span></a>
-        <a href="recharge.html" class="nav-item"><span class="nav-icon">💰</span><span class="nav-text">资产</span></a>
+        <div class="nav-item" onclick="alert('市场深度整合中，请直接在顶部搜索框切换任意代币行情！')">
+            <span class="nav-icon">📊</span><span class="nav-text">行情</span>
+        </div>
+        <div class="nav-item" onclick="window.location.href='otc.html'">
+            <span class="nav-icon">💳</span><span class="nav-text">法币交易</span>
+        </div>
+        <div class="nav-item active" onclick="window.location.href='index.html'">
+            <span class="nav-icon">📈</span><span class="nav-text">合约交易</span>
+        </div>
+        <div class="nav-item" id="nav-asset-btn" onclick="handleNavAsset()">
+            <span class="nav-icon">💰</span><span class="nav-text">资产</span>
+        </div>
     </div>
 
     <script>
-        const coins = [
-            { id: 'bitcoin', name: 'BTC', vol: '24.5B' },
-            { id: 'ethereum', name: 'ETH', vol: '12.1B' },
-            { id: 'solana', name: 'SOL', vol: '3.8B' },
-            { id: 'ripple', name: 'XRP', vol: '1.2B' },
-            { id: 'dogecoin', name: 'DOGE', vol: '950M' }
-        ];
+        let currentCoinId = 'bitcoin'; 
+        let currentSymbol = 'BTC';
+        let tvSymbol = 'BINANCE:BTCUSDT'; 
+        let lastPrice = 0;
+        let tradeDirection = 'buy';
+        let isLogin = localStorage.getItem('isLogin') === 'true';
 
-        async function getPrices() {
-            try {
-                const ids = coins.map(c => c.id).join(',');
-                const res = await fetch(`https://coingecko.com{ids}&vs_currencies=usdt&include_24hr_change=true`);
-                const data = await res.json();
-                
-                let html = '';
-                coins.forEach(coin => {
-                    const market = data[coin.id];
-                    if(market) {
-                        const price = market.usdt;
-                        const change = market.usdt_24h_change || 0;
-                        const cls = change >= 0 ? 'up' : 'down';
-                        const sign = change >= 0 ? '+' : '';
-                        
-                        html += `
-                            <div class="coin-row" onclick="window.location.href='index.html'">
-                                <div class="coin-left">
-                                    <span class="coin-name">${coin.name}/USDT</span>
-                                    <span class="coin-vol">量 ${coin.vol}</span>
-                                </div>
-                                <div class="coin-right">
-                                    <span class="coin-price" style="color: ${change >= 0 ? '#0ECB81' : '#F6465D'}">${price > 1 ? price.toFixed(2) : price.toFixed(4)}</span>
-                                    <div class="coin-change ${cls}">${sign}${change.toFixed(2)}%</div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-                document.getElementById('market-list').innerHTML = html;
-            } catch (e) {}
-        }
-        setInterval(getPrices, 3000);
-        getPrices();
-    </script>
-</body>
-</html>
+        function initTradingView(symbolName) {
+            if (typeof TradingView !== 'undefined') {
